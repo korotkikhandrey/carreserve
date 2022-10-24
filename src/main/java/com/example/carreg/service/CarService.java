@@ -9,18 +9,31 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Service for {@link Car} actions (add, update, remove).
+ */
 @Service
 @Slf4j
 public class CarService {
 
     private Set<Car> cars = new HashSet<>();
 
+    /**
+     * Adds car to the list.
+     * @param car
+     * @return Added {@link Car}
+     */
     public synchronized Car addCar(Car car) {
         cars.add(car);
         log.info("Car with id [{}] has been added.", car.getId());
         return car;
     }
 
+    /**
+     * Updates car in the list. Note: only id can be updated.
+     * @param car
+     * @return Updated {@link Car}
+     */
     public synchronized Car updateCar(Car car) {
         Car foundCar = cars.stream().filter(c -> c.getMake().equals(car.getMake())
                 && c.getModel().equals(car.getModel())).findFirst().orElse(null);
@@ -36,6 +49,11 @@ public class CarService {
         }
     }
 
+    /**
+     * Removes car from the list.
+     * @param id
+     * @return String message
+     */
     public synchronized String removeCar(String id) {
         String message = Strings.EMPTY;
         Optional<Car> carOpt = cars.stream().filter(c -> c.getId().equals(id)).findFirst();

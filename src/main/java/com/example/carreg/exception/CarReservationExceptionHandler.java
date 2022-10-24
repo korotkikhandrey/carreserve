@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Handling validation for incoming JSON data.
+ */
 @ControllerAdvice
 @RestController
 @AllArgsConstructor
@@ -44,6 +47,14 @@ public class CarReservationExceptionHandler extends ResponseEntityExceptionHandl
 
     private static final String VALUE_IS_INCORRECT_TEMPLATE = "%1$s contains incorrect value \"%2$s\", reason: %3$s";
 
+    /**
+     * Gets error message in case of non-valid value for JSON object fields.
+     * @param ex
+     * @param headers
+     * @param status
+     * @param request
+     * @return
+     */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers,
@@ -69,17 +80,9 @@ public class CarReservationExceptionHandler extends ResponseEntityExceptionHandl
                 .collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(invalidAttributes)) {
-            return new ResponseEntity(String.join(";\n", invalidAttributes), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(String.join(";\\n", invalidAttributes), HttpStatus.BAD_REQUEST);
         }
 
         return ResponseEntity.accepted().contentLength(0).build();
     }
-
-
-    @ExceptionHandler({IllegalStateException.class})
-    public final ResponseEntity handleImportBusinessException(IllegalStateException ex, WebRequest request) {
-
-        return ResponseEntity.accepted().contentLength(0).build();
-    }
-
 }
