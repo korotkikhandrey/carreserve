@@ -73,6 +73,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>spring-boot-carreg</finalName>
 	</build>
 
 </project>
