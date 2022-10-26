@@ -1,5 +1,6 @@
 package com.example.carreg.data;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.core.annotation.Order;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Data
+@AllArgsConstructor
 public class Reservation {
     private Car car;
     @Order(1)

@@ -44,7 +44,7 @@ public class CarService {
             return car;
         } else {
             cars.add(car);
-            log.info("Car with id [{}] has been added.", foundCar.getId());
+            log.info("Car with id [{}] has been added.", car.getId());
             return car;
         }
     }
@@ -54,6 +54,7 @@ public class CarService {
      * @param id
      * @return String message
      */
+
     public synchronized String removeCar(String id) {
         String message = Strings.EMPTY;
         Optional<Car> carOpt = cars.stream().filter(c -> c.getId().equals(id)).findFirst();

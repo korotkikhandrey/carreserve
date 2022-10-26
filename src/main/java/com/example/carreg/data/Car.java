@@ -1,6 +1,9 @@
 package com.example.carreg.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 
 import javax.validation.constraints.NotEmpty;
@@ -9,6 +12,7 @@ import javax.validation.constraints.Pattern;
 import java.util.Objects;
 
 @Data
+@AllArgsConstructor
 public class Car {
 
     @Pattern(regexp = "^C[0-9]*$", flags = { Pattern.Flag.CASE_INSENSITIVE }, message = "The car id is invalid. Should match C<number> format!")

@@ -1,5 +1,6 @@
 package com.example.carreg.service;
 
+import com.example.carreg.data.Car;
 import com.example.carreg.data.Reservation;
 import com.example.carreg.exception.Validation;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.example.carreg.utils.CarRegUtils.isThereOverlap;
@@ -29,7 +31,7 @@ public class ReservationService {
 
     public synchronized Reservation addReservation(Reservation reservation) {
         log.info("Reservation started...");
-        Validation validation = checkRegistration(reservation);
+        Validation validation = checkRegistration(reservation, carService.getAllCars());
         if (CollectionUtils.isEmpty(validation.getErrors())) {
             reservationSet.add(reservation);
             log.debug("Reservation has been successfully done for object [{}]", reservation);
@@ -46,10 +48,11 @@ public class ReservationService {
      * @param reservation
      * @return {@link Validation}
      */
-    protected synchronized Validation checkRegistration(Reservation reservation) {
+    protected synchronized Validation checkRegistration(Reservation reservation, Set<Car> allCars) {
         Validation validation = new Validation();
+
         if (!LocalDateTime.now().plusHours(24).isBefore(reservation.getStart()) || reservation.getEnd().minusHours(2).isAfter(reservation.getStart())) {
-            validation.getErrors().add(String.format("Reservation [%s] has not been done, because reservation start date time is before " +
+            validation.getErrors().add(String.format("Reservation [%s] has not been done, because reservation start date time is before" +
                     " now + 24hrs or duration is longer than 2 hrs.", reservation));
         }
 
@@ -57,7 +60,7 @@ public class ReservationService {
             validation.getErrors().add(String.format("Reservation [%s] has not been done, because end time is less than start time.", reservation));
         }
 
-        if (carService.getAllCars().contains(reservation.getCar())) {
+        if (allCars.contains(reservation.getCar())) {
             if (!reservationSet.stream().noneMatch(res ->
                     isThereOverlap(new DateRange(res.getStart(), res.getEnd()),
                                    new DateRange(reservation.getStart(), reservation.getEnd()))
