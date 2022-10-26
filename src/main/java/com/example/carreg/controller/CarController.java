@@ -1,9 +1,10 @@
 package com.example.carreg.controller;
 
-import com.example.carreg.data.Car;
+import com.example.carreg.entity.Car;
 import com.example.carreg.service.CarService;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,18 +19,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/registration")
+@AllArgsConstructor
 public class CarController {
 
     private final CarService carService;
 
-    public CarController(CarService carService) {
-        this.carService = carService;
-    }
-
+    /**
+     * Add car endpoint.
+     * @param car
+     * @return ResponseEntity with {@link Car}
+     */
     @PostMapping(value ="/car",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_JSON_VALUE
@@ -43,6 +46,12 @@ public class CarController {
         return new ResponseEntity<>(car, HttpStatus.OK);
     }
 
+    /**
+     * Update car endpoint. Note: search is performed dy model and make. Only plate license is updated. If car
+     * is not found, it is added.
+     * @param car
+     * @return ResponseEntity with {@link Car}
+     */
     @PutMapping(value ="/car",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
@@ -56,16 +65,25 @@ public class CarController {
         return new ResponseEntity<>(car, HttpStatus.OK);
     }
 
-    @DeleteMapping(value ="/car/{id}")
+    /**
+     * Remove car by libecnse plate endpoint.
+     * @param licensePlate
+     * @return ResponseEntity with appropriate message.
+     */
+    @DeleteMapping(value ="/car/{licensePlate}")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Car was removed."),
-            @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
+            @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, licensePlate should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<String> removeCar(@PathVariable String id) {
-        String response = carService.removeCar(id);
+    public ResponseEntity<String> removeCar(@PathVariable String licensePlate) {
+        String response = carService.removeCar(licensePlate);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * All cars in a system endpoint.
+     * @return ResponseEntity with cars list.
+     */
     @GetMapping(value ="/car",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -73,7 +91,7 @@ public class CarController {
             @ApiResponse(code = 200, message = "All the cars in the system."),
             @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<Set<Car>> getAllCars() {
+    public ResponseEntity<List<Car>> getAllCars() {
         return new ResponseEntity<>(carService.getAllCars(), HttpStatus.OK);
     }
 }

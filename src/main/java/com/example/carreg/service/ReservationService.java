@@ -1,17 +1,23 @@
 package com.example.carreg.service;
 
-import com.example.carreg.data.Car;
-import com.example.carreg.data.Reservation;
+import com.example.carreg.dto.DateRangeDto;
+import com.example.carreg.entity.Car;
+import com.example.carreg.entity.Reservation;
 import com.example.carreg.exception.Validation;
+import com.example.carreg.repository.CarRepository;
+import com.example.carreg.repository.ReservationRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import static com.example.carreg.exception.Messages.NOT_REGISTERED_CAR;
+import static com.example.carreg.exception.Messages.RESERVATION_24_2;
+import static com.example.carreg.exception.Messages.RESERVATION_END_BEFORE_START;
+import static com.example.carreg.exception.Messages.RESERVATION_OVERLAP;
 import static com.example.carreg.utils.CarRegUtils.isThereOverlap;
 
 /**
@@ -19,24 +25,21 @@ import static com.example.carreg.utils.CarRegUtils.isThereOverlap;
  */
 @Service
 @Slf4j
+@AllArgsConstructor
 public class ReservationService {
 
-    private Set<Reservation> reservationSet = new HashSet<>();
+    private final ReservationRepository reservationRepository;
+    private final CarRepository carRepository;
 
-    private final CarService carService;
-
-    public ReservationService(CarService carService) {
-        this.carService = carService;
-    }
-
-    public synchronized Reservation addReservation(Reservation reservation) {
+    public Reservation addReservation(Reservation reservation) {
         log.info("Reservation started...");
-        Validation validation = checkRegistration(reservation, carService.getAllCars());
+        Validation validation = checkRegistration(reservation, carRepository.findAll());
         if (CollectionUtils.isEmpty(validation.getErrors())) {
-            reservationSet.add(reservation);
-            log.debug("Reservation has been successfully done for object [{}]", reservation);
+            reservationRepository.save(reservation);
+            log.info("Reservation has been successfully done for object [{}]", reservation);
             return reservation;
         } else {
+            log.error(String.join("\\n", validation.getErrors()));
             throw new IllegalStateException("Reservation cannot be added. Reason(s): " + String.join("\\n", validation.getErrors()));
         }
     }
@@ -48,28 +51,29 @@ public class ReservationService {
      * @param reservation
      * @return {@link Validation}
      */
-    protected synchronized Validation checkRegistration(Reservation reservation, Set<Car> allCars) {
+    protected Validation checkRegistration(Reservation reservation, List<Car> allCars) {
         Validation validation = new Validation();
 
-        if (!LocalDateTime.now().plusHours(24).isBefore(reservation.getStart()) || reservation.getEnd().minusHours(2).isAfter(reservation.getStart())) {
-            validation.getErrors().add(String.format("Reservation [%s] has not been done, because reservation start date time is before" +
-                    " now + 24hrs or duration is longer than 2 hrs.", reservation));
+        if (!LocalDateTime.now().plusHours(24).isBefore(reservation.getStartDate()) || reservation.getEndDate().minusHours(2).isAfter(reservation.getStartDate())) {
+            validation.getErrors().add(String.format(RESERVATION_24_2, reservation));
+            return validation;
         }
 
-        if (reservation.getStart().isAfter(reservation.getEnd())) {
-            validation.getErrors().add(String.format("Reservation [%s] has not been done, because end time is less than start time.", reservation));
+        if (reservation.getStartDate().isAfter(reservation.getEndDate())) {
+            validation.getErrors().add(String.format(RESERVATION_END_BEFORE_START, reservation));
+            return validation;
         }
 
+        List<Reservation> reservationList = reservationRepository.findAll();
         if (allCars.contains(reservation.getCar())) {
-            if (!reservationSet.stream().noneMatch(res ->
-                    isThereOverlap(new DateRange(res.getStart(), res.getEnd()),
-                                   new DateRange(reservation.getStart(), reservation.getEnd()))
+            if (!reservationList.stream().noneMatch(res ->
+                    isThereOverlap(new DateRangeDto(res.getStartDate(), res.getEndDate()),
+                                   new DateRangeDto(reservation.getStartDate(), reservation.getEndDate()))
                     && res.getCar().equals(reservation.getCar()))) {
-                validation.getErrors().add(String.format("Reservation [%s] is overlapping another reservations. " +
-                        "Please choose another time period and/or car.", reservation));
+                validation.getErrors().add(String.format(RESERVATION_OVERLAP, reservation));
             }
         } else {
-            validation.getErrors().add(String.format("Car [%s] has not been registered yet.", reservation));
+            validation.getErrors().add(String.format(NOT_REGISTERED_CAR, reservation));
         }
 
         return validation;
@@ -79,7 +83,8 @@ public class ReservationService {
      * Gets all reservations.
      * @return
      */
-    public Set<Reservation> getAllReservations() {
-        return reservationSet;
+    public List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
     }
+
 }

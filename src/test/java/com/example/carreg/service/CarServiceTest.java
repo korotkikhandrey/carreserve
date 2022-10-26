@@ -1,26 +1,36 @@
 package com.example.carreg.service;
 
-import com.example.carreg.data.Car;
+import com.example.carreg.entity.Car;
+import com.example.carreg.repository.CarRepository;
+import com.example.carreg.repository.ReservationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static com.example.carreg.utils.TestUtils.createCar;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class CarServiceTest {
 
+    @MockBean
+    private CarRepository carRepository;
+
+    @MockBean
+    private ReservationRepository reservationRepository;
+
     @SpyBean
     private CarService carService;
-
-    @BeforeEach
-    public void setup() {
-        carService.getAllCars().clear();
-    }
 
     @Test
     public void test_addCar() {
@@ -31,26 +41,39 @@ public class CarServiceTest {
         carService.addCar(car);
 
         //then
-        assertTrue(carService.getAllCars().contains(car));
+        verify(carRepository).save(any(Car.class));
     }
 
     @Test
-    public void test_updateCar() {
+    public void test_updateCar_found() {
 
         //given
         Car car = createCar("C764375", "Ford", "Focus");
         Car carUpdated = createCar("C764376", "Ford", "Focus");
-        Car carNotFoundToAdd = createCar("C764377", "Ford", "Fiesta");
+        when(carRepository.findByMakeAndModel(anyString(), anyString())).thenReturn(car);
 
         //when
-        carService.addCar(car);
         carService.updateCar(carUpdated);
-        carService.updateCar(carNotFoundToAdd);
 
         //then
-        assertTrue(carService.getAllCars().contains(carUpdated));
-        assertFalse(carService.getAllCars().contains(car));
-        assertTrue(carService.getAllCars().contains(carNotFoundToAdd));
+        verify(carRepository).delete(any(Car.class));
+        verify(carRepository).save(any(Car.class));
+    }
+
+    @Test
+    public void test_updateCar_notfound() {
+
+        //given
+        Car car = createCar("C764375", "Ford", "Focus");
+        Car carUpdated = createCar("C764376", "Ford", "Focus");
+        when(carRepository.findByMakeAndModel(anyString(), anyString())).thenReturn(null);
+
+        //when
+        carService.updateCar(carUpdated);
+
+        //then
+        verify(carRepository, never()).delete(any(Car.class));
+        verify(carRepository).save(any(Car.class));
     }
 
     @Test
@@ -58,18 +81,15 @@ public class CarServiceTest {
 
         //given
         Car car1 = createCar("C764375", "Ford", "Focus");
-        Car car2 = createCar("C764377", "Ford", "Fiesta");
-        carService.addCar(car1);
-        carService.addCar(car2);
-        assertTrue(carService.getAllCars().contains(car1));
-        assertTrue(carService.getAllCars().contains(car2));
 
+        when(carRepository.findByLicensePlate(anyString())).thenReturn(car1);
         //when
-        carService.removeCar(car2.getId());
+        carService.removeCar(car1.getLicensePlate());
 
         //then
-        assertTrue(carService.getAllCars().contains(car1));
-        assertFalse(carService.getAllCars().contains(car2));
+        verify(reservationRepository).removeReservationsByCar(any(Car.class));
+        verify(carRepository).delete(any(Car.class));
+
     }
 
 }

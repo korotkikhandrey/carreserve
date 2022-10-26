@@ -1,0 +1,91 @@
+databaseChangeLog:
+  - changeSet:
+      id: InitialDB_Create
+      author: akorotki
+      changes:
+        - createSequence:
+            sequenceName: seq_id
+        - createTable:
+            tableName: car
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: license_plate
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: make
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  defaultValue: CURRENT_TIMESTAMP()
+                  name: create_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            columnNames: id
+            constraintName: pk_car_id
+            tableName: car
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: BIGINT
+            startWith: 1
+            tableName: car
+        - createTable:
+            tableName: reservation
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: car_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  defaultValue: CURRENT_TIMESTAMP()
+                  name: start_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  defaultValue: CURRENT_TIMESTAMP()
+                  name: end_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  defaultValue: CURRENT_TIMESTAMP()
+                  name: create_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            columnNames: id
+            constraintName: pk_reservation_id
+            tableName: reservation
+        - addAutoIncrement:
+            columnName: id
+            columnDataType: BIGINT
+            startWith: 1
+            tableName: reservation
+        - addForeignKeyConstraint:
+            baseColumnNames: car_id
+            baseTableName: reservation
+            constraintName: fk_reservation_car
+            referencedColumnNames: id
+            referencedTableName: car

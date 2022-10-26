@@ -1,31 +1,41 @@
 package com.example.carreg.service;
 
-import com.example.carreg.data.Car;
+import com.example.carreg.entity.Car;
+import com.example.carreg.repository.CarRepository;
+import com.example.carreg.repository.ReservationRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.List;
+
+import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_NOT_FOUND_ADDED;
+import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_REMOVED;
+import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_UPDATED;
+import static com.example.carreg.exception.Messages.NO_CARS_WITH_LICENSE_PLATE_FOUND;
 
 /**
  * Service for {@link Car} actions (add, update, remove).
  */
 @Service
 @Slf4j
+@AllArgsConstructor
 public class CarService {
 
-    private Set<Car> cars = new HashSet<>();
+    private final ReservationRepository reservationRepository;
+
+    private final CarRepository carRepository;
 
     /**
      * Adds car to the list.
      * @param car
      * @return Added {@link Car}
      */
-    public synchronized Car addCar(Car car) {
-        cars.add(car);
-        log.info("Car with id [{}] has been added.", car.getId());
+    public Car addCar(Car car) {
+        carRepository.save(car);
+        log.info("Car with id [{}] has been added.", car.getLicensePlate());
         return car;
     }
 
@@ -34,44 +44,48 @@ public class CarService {
      * @param car
      * @return Updated {@link Car}
      */
-    public synchronized Car updateCar(Car car) {
-        Car foundCar = cars.stream().filter(c -> c.getMake().equals(car.getMake())
-                && c.getModel().equals(car.getModel())).findFirst().orElse(null);
+    @Transactional(rollbackFor = Exception.class)
+    public Car updateCar(Car car) {
+
+        Car foundCar = carRepository.findByMakeAndModel(car.getMake(), car.getModel());
         if (foundCar != null) {
-            cars.remove(foundCar);
-            cars.add(car);
-            log.info("Car with id [{}] has been updated. New id id [{}]", foundCar.getId(), car.getId());
-            return car;
+            carRepository.delete(foundCar);
+            carRepository.save(car);
+            log.info(CAR_WITH_LICENSE_PLATE_UPDATED, foundCar.getLicensePlate(), car.getLicensePlate());
         } else {
-            cars.add(car);
-            log.info("Car with id [{}] has been added.", car.getId());
-            return car;
+            carRepository.save(car);
+            log.info(CAR_WITH_LICENSE_PLATE_NOT_FOUND_ADDED, car.getLicensePlate());
         }
+        return car;
     }
 
     /**
      * Removes car from the list.
-     * @param id
+     * @param licensePlate
      * @return String message
      */
-
-    public synchronized String removeCar(String id) {
+    @Transactional(rollbackFor = Exception.class)
+    public String removeCar(String licensePlate) {
         String message = Strings.EMPTY;
-        Optional<Car> carOpt = cars.stream().filter(c -> c.getId().equals(id)).findFirst();
-        if (carOpt.isPresent()) {
-            cars.remove(carOpt.get());
-            message = String.format("Car with id [%s] has been removed.", id);
-            log.info(message);
-
+        Car car = carRepository.findByLicensePlate(licensePlate);
+        if (car == null) {
+            message = String.format(NO_CARS_WITH_LICENSE_PLATE_FOUND, licensePlate);
         } else {
-            message = String.format("No cars with [%s].", id);
-            log.info(message);
+            reservationRepository.removeReservationsByCar(car);
+            carRepository.delete(car);
+            message = String.format(CAR_WITH_LICENSE_PLATE_REMOVED, licensePlate);
         }
 
+        log.info(message);
         return message;
     }
 
-    public Set<Car> getAllCars() {
-        return cars;
+    /**
+     * Gets all cars.
+     * @return
+     */
+    public List<Car> getAllCars() {
+        return carRepository.findAll();
     }
+
 }

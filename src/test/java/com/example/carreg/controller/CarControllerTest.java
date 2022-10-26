@@ -1,9 +1,8 @@
 package com.example.carreg.controller;
 
-import com.example.carreg.data.Car;
+import com.example.carreg.entity.Car;
 import com.example.carreg.service.CarService;
 import com.example.carreg.service.ReservationService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,13 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @WebMvcTest
 public class CarControllerTest {
 
-    @SpyBean
+    @MockBean
     private ReservationService reservationService;
 
-    @SpyBean
-    private ReservationController reservationController;
-
-    @SpyBean
+    @MockBean
     private CarService carService;
 
     @SpyBean
@@ -56,10 +53,10 @@ public class CarControllerTest {
         carService.getAllCars().clear();
     }
 
-    @AfterEach
+    /*@AfterEach
     public void setupAfter() {
         carService.getAllCars().clear();
-    }
+    }*/
 
     @Test
     public void test_registration_car() throws Exception {
@@ -100,7 +97,7 @@ public class CarControllerTest {
         //String json = objectWriter.writeValueAsString(carForUpdate);
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                .delete("/registration/car/{id}", car.getId())).andReturn();
+                .delete("/registration/car/{id}", car.getLicensePlate())).andReturn();
 
         int status = mvcResult.getResponse().getStatus();
         //assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());

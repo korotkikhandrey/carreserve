@@ -1,7 +1,7 @@
 package com.example.carreg.utils;
 
-import com.example.carreg.data.Car;
-import com.example.carreg.data.Reservation;
+import com.example.carreg.entity.Car;
+import com.example.carreg.entity.Reservation;
 
 import java.time.LocalDateTime;
 
