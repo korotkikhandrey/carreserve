@@ -70,6 +70,8 @@ public class ReservationControllerTest {
 
     /**
      * Tests that in case of registered car and adding reservation for it, it will be returned with code 200.
+     * POST /reservation/add
+     *
      * @throws Exception
      */
     @Test
@@ -93,6 +95,7 @@ public class ReservationControllerTest {
 
     /**
      * Tests that in case of there are some reservations in DB, all of them will be returned with code 200.
+     * GET /reservation/all
      * @throws Exception
      */
     @Test

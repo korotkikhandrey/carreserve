@@ -3,8 +3,6 @@ package com.example.carreg.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import org.springframework.core.annotation.Order;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,8 +13,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 
+/**
+ * Reservation entity.
+ */
 @Data
 @AllArgsConstructor
 @Entity

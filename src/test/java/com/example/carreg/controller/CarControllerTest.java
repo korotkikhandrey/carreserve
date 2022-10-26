@@ -22,6 +22,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static com.example.carreg.utils.TestUtils.createCar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Test class for {@link CarController}
+ */
 @WebMvcTest
 public class CarControllerTest {
 
@@ -53,55 +56,64 @@ public class CarControllerTest {
         carService.getAllCars().clear();
     }
 
-    /*@AfterEach
-    public void setupAfter() {
-        carService.getAllCars().clear();
-    }*/
-
+    /**
+     * Tests POST "/registration/car" endpoint.
+     * @throws Exception
+     */
     @Test
-    public void test_registration_car() throws Exception {
-        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();;
+    public void test_addCar() throws Exception {
 
+        //given
         String json = objectWriter.writeValueAsString(car);
+
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .post("/registration/car").content(json).contentType(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
+        //then
         int status = mvcResult.getResponse().getStatus();
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
         assertEquals(json.replaceAll("\\s", ""), mvcResult.getResponse().getContentAsString());
         assertEquals(200, status);
     }
 
+    /**
+     * Tests PUT "/registration/car" endpoint.
+     * @throws Exception
+     */
     @Test
-    public void test_update_car() throws Exception {
+    public void test_updateCar() throws Exception {
+
+        //given
         ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();;
         carService.addCar(car);
         Car carForUpdate = createCar("C764376", "Ford", "Focus");
         String json = objectWriter.writeValueAsString(carForUpdate);
+
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .put("/registration/car").content(json).contentType(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
+        //then
         int status = mvcResult.getResponse().getStatus();
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
         assertEquals(json.replaceAll("\\s", ""), mvcResult.getResponse().getContentAsString());
         assertEquals(200, status);
     }
 
+    /**
+     * Tests DELETE "/registration/car/{id}" endpoint.
+     * @throws Exception
+     */
     @Test
-    public void test_remove_car() throws Exception {
-        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();;
-        carService.addCar(car);
+    public void test_removeCar() throws Exception {
 
-        //String json = objectWriter.writeValueAsString(carForUpdate);
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .delete("/registration/car/{id}", car.getLicensePlate())).andReturn();
 
+        //then
         int status = mvcResult.getResponse().getStatus();
-        //assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
-        //assertEquals(json.replaceAll("\\s", ""), mvcResult.getResponse().getContentAsString());
         assertEquals(200, status);
     }
 

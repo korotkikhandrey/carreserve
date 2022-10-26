@@ -11,6 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
+/**
+ * Abstract entity for @Entity objects.
+ */
 @MappedSuperclass
 @Getter
 @Setter

@@ -8,12 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
+/**
+ * Repository for {@link Reservation}
+ */
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findReservationsByCarId(Long id);
-
+    /**
+     * Removes {@link Reservation} by given {@link Car}
+     * @param car
+     */
     @Modifying
     @Query("delete from Reservation r where r.car = :car")
     @Transactional

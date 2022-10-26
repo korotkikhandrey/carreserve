@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
+/**
+ * Car restcontroller.
+ */
 @RestController
 @RequestMapping("/registration")
 @AllArgsConstructor
@@ -29,7 +32,7 @@ public class CarController {
     private final CarService carService;
 
     /**
-     * Add car endpoint.
+     * Adds car endpoint.
      * @param car
      * @return ResponseEntity with {@link Car}
      */
@@ -47,7 +50,7 @@ public class CarController {
     }
 
     /**
-     * Update car endpoint. Note: search is performed dy model and make. Only plate license is updated. If car
+     * Updates car endpoint. Note: search is performed dy model and make. Only plate license is updated. If car
      * is not found, it is added.
      * @param car
      * @return ResponseEntity with {@link Car}
@@ -66,7 +69,7 @@ public class CarController {
     }
 
     /**
-     * Remove car by libecnse plate endpoint.
+     * Removes car by libecnse plate endpoint.
      * @param licensePlate
      * @return ResponseEntity with appropriate message.
      */
