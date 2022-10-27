@@ -1,8 +1,10 @@
 package com.example.carreg.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -26,5 +28,12 @@ public class AbstractEntity {
 
     @Column(name = "create_date", nullable = false)
     @CreationTimestamp
+    @JsonIgnore
     private LocalDateTime createDate;
+
+    @Column(name = "modify_date", nullable = false)
+    @UpdateTimestamp
+    @JsonIgnore
+    private LocalDateTime modifyDate;
+
 }

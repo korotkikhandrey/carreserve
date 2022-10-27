@@ -1,8 +1,10 @@
 package com.example.carreg.service;
 
 import com.example.carreg.entity.Car;
+import com.example.carreg.entity.Reservation;
 import com.example.carreg.repository.CarRepository;
 import com.example.carreg.repository.ReservationRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,6 +12,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static com.example.carreg.utils.TestUtils.createCar;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -48,15 +52,16 @@ public class CarServiceTest {
 
         //given
         Car car = createCar("C764375", "Ford", "Focus");
-        Car carUpdated = createCar("C764376", "Ford", "Focus");
-        when(carRepository.findByMakeAndModel(anyString(), anyString())).thenReturn(car);
+        Car carUpdated = createCar("C764376", "Ford", "Mustang");
+        when(carRepository.findByLicensePlate(anyString())).thenReturn(car);
 
         //when
-        carService.updateCar(carUpdated);
+        Car foundCar = carService.updateCar("C764375", carUpdated);
 
         //then
-        verify(carRepository).delete(any(Car.class));
-        verify(carRepository).save(any(Car.class));
+        assertEquals("C764376", foundCar.getLicensePlate());
+        assertEquals("Ford", foundCar.getMake());
+        assertEquals("Mustang", foundCar.getModel());
     }
 
     @Test
@@ -64,14 +69,15 @@ public class CarServiceTest {
 
         //given
         Car carUpdated = createCar("C764376", "Ford", "Focus");
-        when(carRepository.findByMakeAndModel(anyString(), anyString())).thenReturn(null);
+        when(carRepository.findByLicensePlate(anyString())).thenReturn(null);
 
         //when
-        carService.updateCar(carUpdated);
+        IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> {
+            carService.updateCar("C764376", carUpdated);
+        });
 
         //then
-        verify(carRepository, never()).delete(any(Car.class));
-        verify(carRepository).save(any(Car.class));
+        assertTrue(thrown.getMessage().equals("Car with license plate [C764376] not found to be updated."));
     }
 
     @Test

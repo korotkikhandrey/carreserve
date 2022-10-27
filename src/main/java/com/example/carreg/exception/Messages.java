@@ -12,5 +12,5 @@ public class Messages {
     public static String NO_CARS_WITH_LICENSE_PLATE_FOUND = "No cars with license plate [%s].";
     public static String CAR_WITH_LICENSE_PLATE_REMOVED = "Car with licensePlate [%s] has been removed.";
     public static String CAR_WITH_LICENSE_PLATE_UPDATED = "Car with license plate [{}] has been updated. New license plate is [{}]";
-    public static String CAR_WITH_LICENSE_PLATE_NOT_FOUND_ADDED = "Car with license plate [{}] not found, has been added.";
+    public static String CAR_WITH_LICENSE_PLATE_NOT_FOUND = "Car with license plate [%s] not found to be updated.";
 }

@@ -1,6 +1,8 @@
 package com.example.carreg.controller;
 
 import com.example.carreg.entity.Car;
+import com.example.carreg.repository.CarRepository;
+import com.example.carreg.repository.ReservationRepository;
 import com.example.carreg.service.CarService;
 import com.example.carreg.service.ReservationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +23,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.example.carreg.utils.TestUtils.createCar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link CarController}
@@ -29,10 +33,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CarControllerTest {
 
     @MockBean
-    private ReservationService reservationService;
+    private ReservationRepository reservationRepository;
 
     @MockBean
+    private ReservationService reservationService;
+
+    @SpyBean
     private CarService carService;
+
+    @MockBean
+    private CarRepository carRepository;
 
     @SpyBean
     private CarController carController;
@@ -85,18 +95,18 @@ public class CarControllerTest {
     public void test_updateCar() throws Exception {
 
         //given
-        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();;
-        carService.addCar(car);
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        when(carRepository.findByLicensePlate(anyString())).thenReturn(car);
         Car carForUpdate = createCar("C764376", "Ford", "Focus");
         String json = objectWriter.writeValueAsString(carForUpdate);
 
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                .put("/registration/car").content(json).contentType(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+                .put("/registration/car").param("plateLicense", "C764375").content(json).contentType(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 
         //then
         int status = mvcResult.getResponse().getStatus();
-        assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
+        //assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
         assertEquals(json.replaceAll("\\s", ""), mvcResult.getResponse().getContentAsString());
         assertEquals(200, status);
     }

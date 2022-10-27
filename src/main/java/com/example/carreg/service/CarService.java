@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_NOT_FOUND_ADDED;
+import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_NOT_FOUND;
 import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_REMOVED;
 import static com.example.carreg.exception.Messages.CAR_WITH_LICENSE_PLATE_UPDATED;
 import static com.example.carreg.exception.Messages.NO_CARS_WITH_LICENSE_PLATE_FOUND;
@@ -39,24 +39,24 @@ public class CarService {
         return car;
     }
 
-    /**
-     * Updates car in the list. Note: only id can be updated.
-     * @param car
-     * @return Updated {@link Car}
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public Car updateCar(Car car) {
 
-        Car foundCar = carRepository.findByMakeAndModel(car.getMake(), car.getModel());
+    @Transactional(rollbackFor = Exception.class)
+    public Car updateCar(String plateLicense, Car car) {
+        Car foundCar = carRepository.findByLicensePlate(plateLicense);
+
         if (foundCar != null) {
-            carRepository.delete(foundCar);
-            carRepository.save(car);
-            log.info(CAR_WITH_LICENSE_PLATE_UPDATED, foundCar.getLicensePlate(), car.getLicensePlate());
-        } else {
-            carRepository.save(car);
-            log.info(CAR_WITH_LICENSE_PLATE_NOT_FOUND_ADDED, car.getLicensePlate());
+            foundCar.setLicensePlate(car.getLicensePlate());
+            foundCar.setMake(car.getMake());
+            foundCar.setModel(car.getModel());
+            carRepository.save(foundCar);
+            log.info(CAR_WITH_LICENSE_PLATE_UPDATED, plateLicense, foundCar.getLicensePlate());
+            return foundCar;
         }
-        return car;
+
+        String msg = String.format(CAR_WITH_LICENSE_PLATE_NOT_FOUND, plateLicense);
+        log.error(msg);
+        throw new IllegalStateException(msg);
+
     }
 
     /**

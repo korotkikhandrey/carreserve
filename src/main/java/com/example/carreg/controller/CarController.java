@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,12 +50,7 @@ public class CarController {
         return new ResponseEntity<>(car, HttpStatus.OK);
     }
 
-    /**
-     * Updates car endpoint. Note: search is performed dy model and make. Only plate license is updated. If car
-     * is not found, it is added.
-     * @param car
-     * @return ResponseEntity with {@link Car}
-     */
+
     @PutMapping(value ="/car",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
@@ -63,8 +59,9 @@ public class CarController {
             @ApiResponse(code = 200, message = "Car was updated."),
             @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<Car> updateCar(@Valid @RequestBody Car car) {
-        carService.updateCar(car);
+    public ResponseEntity<Object> updateCar(@RequestParam String plateLicense,
+                                            @Valid @RequestBody Car car) {
+        carService.updateCar(plateLicense, car);
         return new ResponseEntity<>(car, HttpStatus.OK);
     }
 

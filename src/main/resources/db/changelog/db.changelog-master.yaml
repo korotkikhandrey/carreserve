@@ -34,6 +34,12 @@ databaseChangeLog:
                   type: TIMESTAMP
                   constraints:
                     nullable: false
+              - column:
+                  defaultValue: CURRENT_TIMESTAMP()
+                  name: modify_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
         - addPrimaryKey:
             columnNames: id
             constraintName: pk_car_id
@@ -42,6 +48,9 @@ databaseChangeLog:
             columnName: id
             columnDataType: BIGINT
             startWith: 1
+            tableName: car
+        - addUniqueConstraint:
+            columnNames: license_plate
             tableName: car
         - createTable:
             tableName: reservation
@@ -71,6 +80,12 @@ databaseChangeLog:
               - column:
                   defaultValue: CURRENT_TIMESTAMP()
                   name: create_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  defaultValue: CURRENT_TIMESTAMP()
+                  name: modify_date
                   type: TIMESTAMP
                   constraints:
                     nullable: false

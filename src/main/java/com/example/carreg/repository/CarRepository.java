@@ -14,13 +14,4 @@ public interface CarRepository extends JpaRepository<Car, Long> {
      * @return
      */
     Car findByLicensePlate(String licensePlate);
-
-    /**
-     * Finds {@link Car} by make and model.
-     * @param make
-     * @param model
-     * @return
-     */
-    Car findByMakeAndModel(String make, String model);
-
 }
