@@ -6,6 +6,7 @@ import com.example.carreg.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,22 +42,21 @@ public class CarService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public Car updateCar(String plateLicense, Car car) {
+    public String updateCar(String plateLicense, Car car) {
         Car foundCar = carRepository.findByLicensePlate(plateLicense);
-
+        String message = Strings.EMPTY;
         if (foundCar != null) {
             foundCar.setLicensePlate(car.getLicensePlate());
             foundCar.setMake(car.getMake());
             foundCar.setModel(car.getModel());
             carRepository.save(foundCar);
-            log.info(CAR_WITH_LICENSE_PLATE_UPDATED, plateLicense, foundCar.getLicensePlate());
-            return foundCar;
+            message = String.format(CAR_WITH_LICENSE_PLATE_UPDATED, plateLicense, foundCar.getLicensePlate());
+
+        } else {
+            message = String.format(CAR_WITH_LICENSE_PLATE_NOT_FOUND, plateLicense);
         }
-
-        String msg = String.format(CAR_WITH_LICENSE_PLATE_NOT_FOUND, plateLicense);
-        log.error(msg);
-        throw new IllegalStateException(msg);
-
+        log.info(message);
+        return message;
     }
 
     /**

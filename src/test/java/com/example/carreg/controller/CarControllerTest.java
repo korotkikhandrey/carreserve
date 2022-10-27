@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.example.carreg.utils.TestUtils.createCar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -106,8 +107,8 @@ public class CarControllerTest {
 
         //then
         int status = mvcResult.getResponse().getStatus();
-        //assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
-        assertEquals(json.replaceAll("\\s", ""), mvcResult.getResponse().getContentAsString());
+
+        assertTrue(mvcResult.getResponse().getContentAsString().equals("Car with license plate [C764375] has been updated. New license plate is [C764376]"));
         assertEquals(200, status);
     }
 

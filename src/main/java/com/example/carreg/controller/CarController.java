@@ -56,13 +56,13 @@ public class CarController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Car was updated."),
+            @ApiResponse(code = 200, message = "Car was updated or not updated due to object was not found to be updated. "),
             @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<Object> updateCar(@RequestParam String plateLicense,
+    public ResponseEntity<String> updateCar(@RequestParam String plateLicense,
                                             @Valid @RequestBody Car car) {
-        carService.updateCar(plateLicense, car);
-        return new ResponseEntity<>(car, HttpStatus.OK);
+        String message = carService.updateCar(plateLicense, car);
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
