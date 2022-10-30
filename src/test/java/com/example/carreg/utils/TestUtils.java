@@ -1,5 +1,7 @@
 package com.example.carreg.utils;
 
+import com.example.carreg.domain.CarModel;
+import com.example.carreg.domain.ReservationModel;
 import com.example.carreg.entity.Car;
 import com.example.carreg.entity.Reservation;
 
@@ -21,15 +23,23 @@ public class TestUtils {
         return new Reservation(car, start, end);
     }
 
+    public static ReservationModel createReservationModel(CarModel carModel, LocalDateTime start, LocalDateTime end) {
+        return new ReservationModel(carModel, start, end);
+    }
+
     /**
      * Creates {@link  Car} for test purposes.
-     * @param id
+     * @param identifier
      * @param make
      * @param model
      * @return {@link Car}
      */
-    public static Car createCar(String id, String make, String model) {
-        return new Car(id, make, model);
+    public static Car createCar(String identifier, String make, String model) {
+        return new Car(identifier, make, model);
+    }
+
+    public static CarModel createCarModel(String identifier, String make, String model) {
+        return new CarModel(identifier, make, model);
     }
 
 }

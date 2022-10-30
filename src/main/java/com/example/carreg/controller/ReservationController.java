@@ -1,5 +1,6 @@
 package com.example.carreg.controller;
 
+import com.example.carreg.domain.ReservationModel;
 import com.example.carreg.entity.Reservation;
 import com.example.carreg.service.ReservationService;
 import lombok.AllArgsConstructor;
@@ -26,15 +27,22 @@ public class ReservationController {
 
     /**
      * Adds reservation for particular car.
-     * @param reservation
+     * @param reservationModel
      * @return ResponseEntity with {@link Reservation} saved.
      */
     @PostMapping(value = "/add",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Reservation> addReservation(@RequestBody Reservation reservation) {
-        Reservation reservationDone = reservationService.addReservation(reservation);
-        return new ResponseEntity<>(reservationDone, HttpStatus.OK);
+    public ResponseEntity<ReservationModel> addReservation(@RequestBody ReservationModel reservationModel) {
+        ResponseEntity responseEntity;
+        try {
+            ReservationModel reservationDone = reservationService.addReservation(reservationModel);
+            responseEntity = new ResponseEntity<>(reservationDone, HttpStatus.OK);
+        } catch (Exception exception) {
+            responseEntity = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
+        }
+
+        return responseEntity;
     }
 
     /**
@@ -43,8 +51,8 @@ public class ReservationController {
      * @return ResponseEntity with List of {@link Reservation} saved.
      */
     @GetMapping(value = "/all",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Reservation>> getAllReservations() {
-        List<Reservation> reservations = reservationService.getAllReservations();
+    public ResponseEntity<List<ReservationModel>> getAllReservations() {
+        List<ReservationModel> reservations = reservationService.getAllReservations();
         return new ResponseEntity<>(reservations, HttpStatus.OK);
     }
 

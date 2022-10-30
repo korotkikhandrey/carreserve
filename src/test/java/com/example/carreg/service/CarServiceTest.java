@@ -1,7 +1,9 @@
 package com.example.carreg.service;
 
+import com.example.carreg.converter.CarConverter;
+import com.example.carreg.converter.ReservationConverter;
+import com.example.carreg.domain.CarModel;
 import com.example.carreg.entity.Car;
-import com.example.carreg.entity.Reservation;
 import com.example.carreg.repository.CarRepository;
 import com.example.carreg.repository.ReservationRepository;
 import org.junit.jupiter.api.Assertions;
@@ -12,11 +14,11 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static com.example.carreg.utils.TestUtils.createCar;
+import static com.example.carreg.utils.TestUtils.createCarModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,15 +37,26 @@ public class CarServiceTest {
     @SpyBean
     private CarService carService;
 
+    @SpyBean
+    private CarConverter carConverter;
+
+    @SpyBean
+    private ReservationConverter reservationConverter;
+
     @Test
-    public void test_addCar() {
+    public void test_addCar() throws Exception {
         //given
         Car car = createCar("C764375", "Ford", "Focus");
+        CarModel carModel = createCarModel("C764375", "Ford", "Focus");
+        when(carRepository.save(any(Car.class))).thenReturn(car);
 
         //when
-        carService.addCar(car);
+        CarModel carModelSaved = carService.addCar(carModel);
 
         //then
+        assertEquals(carModel.getModel(), carModelSaved.getModel());
+        assertEquals(carModel.getMake(), carModelSaved.getMake());
+        assertEquals(carModel.getIdentifier(), carModelSaved.getIdentifier());
         verify(carRepository).save(any(Car.class));
     }
 
@@ -52,31 +65,32 @@ public class CarServiceTest {
 
         //given
         Car car = createCar("C764375", "Ford", "Focus");
-        Car carUpdated = createCar("C764376", "Ford", "Mustang");
-        when(carRepository.findByLicensePlate(anyString())).thenReturn(car);
+        CarModel carUpdated = createCarModel("C764376", "Ford", "Mustang");
+        when(carRepository.findByIdentifier(anyString())).thenReturn(car);
 
         //when
-        String message = carService.updateCar("C764375", carUpdated);
+        CarModel carModel = carService.updateCar("C764375", carUpdated);
 
         //then
-        /*assertEquals("C764376", foundCar.getLicensePlate());
-        assertEquals("Ford", foundCar.getMake());
-        assertEquals("Mustang", foundCar.getModel());*/
+        assertEquals("C764376", carModel.getIdentifier());
+        assertEquals("Ford", carModel.getMake());
+        assertEquals("Mustang", carModel.getModel());
     }
 
     @Test
     public void test_updateCar_notfound() {
 
         //given
-        Car carUpdated = createCar("C764376", "Ford", "Focus");
-        when(carRepository.findByLicensePlate(anyString())).thenReturn(null);
+        CarModel carUpdated = createCarModel("C764376", "Ford", "Focus");
+        when(carRepository.findByIdentifier(anyString())).thenReturn(null);
 
         //when
-        String message = carService.updateCar("C764376", carUpdated);
-
+        IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> {
+            CarModel carModel = carService.updateCar("C764376", carUpdated);
+        });
 
         //then
-        assertTrue(message.equals("Car with license plate [C764376] not found to be updated."));
+        assertNotNull(thrown);
     }
 
     @Test
@@ -84,10 +98,10 @@ public class CarServiceTest {
 
         //given
         Car car1 = createCar("C764375", "Ford", "Focus");
-        when(carRepository.findByLicensePlate(anyString())).thenReturn(car1);
+        when(carRepository.findByIdentifier(anyString())).thenReturn(car1);
 
         //when
-        carService.removeCar(car1.getLicensePlate());
+        carService.removeCar(car1.getIdentifier());
 
         //then
         verify(reservationRepository).removeReservationsByCar(any(Car.class));

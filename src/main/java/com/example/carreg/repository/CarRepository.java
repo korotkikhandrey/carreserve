@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CarRepository extends JpaRepository<Car, Long> {
 
     /**
-     * Finds {@link Car} by license plate.
-     * @param licensePlate
+     * Finds {@link Car} by identifier.
+     * @param identifier
      * @return
      */
-    Car findByLicensePlate(String licensePlate);
+    Car findByIdentifier(String identifier);
 }

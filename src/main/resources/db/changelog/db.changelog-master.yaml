@@ -14,7 +14,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: license_plate
+                  name: identifier
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
@@ -50,7 +50,7 @@ databaseChangeLog:
             startWith: 1
             tableName: car
         - addUniqueConstraint:
-            columnNames: license_plate
+            columnNames: identifier
             tableName: car
         - createTable:
             tableName: reservation

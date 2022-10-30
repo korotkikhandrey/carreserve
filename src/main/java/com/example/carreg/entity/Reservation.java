@@ -24,7 +24,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Reservation extends AbstractEntity {
 
-    @ManyToOne(cascade = {CascadeType.REMOVE})
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "car_id")
     @NotNull
     private Car car;

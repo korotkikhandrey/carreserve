@@ -1,5 +1,6 @@
 package com.example.carreg.controller;
 
+import com.example.carreg.domain.CarModel;
 import com.example.carreg.entity.Car;
 import com.example.carreg.service.CarService;
 import io.swagger.annotations.ApiResponse;
@@ -34,7 +35,7 @@ public class CarController {
 
     /**
      * Adds car endpoint.
-     * @param car
+     * @param carModel
      * @return ResponseEntity with {@link Car}
      */
     @PostMapping(value ="/car",
@@ -45,9 +46,11 @@ public class CarController {
             @ApiResponse(code = 200, message = "Car was added to the system."),
             @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<Car> addCar(@Valid @RequestBody Car car) {
-        carService.addCar(car);
-        return new ResponseEntity<>(car, HttpStatus.OK);
+    public ResponseEntity<Void> addCar(@Valid @RequestBody CarModel carModel) {
+        ResponseEntity responseEntity;
+        CarModel result = carService.addCar(carModel);
+        responseEntity = ResponseEntity.ok().body(result);
+        return responseEntity;
     }
 
 
@@ -59,25 +62,42 @@ public class CarController {
             @ApiResponse(code = 200, message = "Car was updated or not updated due to object was not found to be updated. "),
             @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<String> updateCar(@RequestParam String plateLicense,
-                                            @Valid @RequestBody Car car) {
-        String message = carService.updateCar(plateLicense, car);
-        return new ResponseEntity<>(message, HttpStatus.OK);
+    public ResponseEntity<CarModel> updateCar(@RequestParam String identifier,
+                                              @Valid @RequestBody CarModel carModel) {
+        CarModel updateCar;
+        ResponseEntity responseEntity;
+        try {
+            updateCar = carService.updateCar(identifier, carModel);
+            responseEntity = ResponseEntity.status(HttpStatus.OK).body(updateCar);
+        } catch (Exception exception) {
+            responseEntity = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
+        }
+
+        return responseEntity;
     }
 
     /**
-     * Removes car by libecnse plate endpoint.
-     * @param licensePlate
+     * Removes car by identifier.
+     * @param identifier
      * @return ResponseEntity with appropriate message.
      */
-    @DeleteMapping(value ="/car/{licensePlate}")
+    @DeleteMapping(value ="/car/{identifier}")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Car was removed."),
-            @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, licensePlate should match C<number> format.")} )
+            @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, identifier should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<String> removeCar(@PathVariable String licensePlate) {
-        String response = carService.removeCar(licensePlate);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<Void> removeCar(@PathVariable String identifier) {
+
+        ResponseEntity responseEntity;
+        String message;
+        try {
+            message = carService.removeCar(identifier);
+            responseEntity = ResponseEntity.status(HttpStatus.OK).body(message);
+        } catch (Exception exception) {
+            responseEntity = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
+        }
+
+        return responseEntity;
     }
 
     /**
@@ -91,7 +111,7 @@ public class CarController {
             @ApiResponse(code = 200, message = "All the cars in the system."),
             @ApiResponse(code = 400, message = "Probably car object is not valid. All the fields should be nonnull, id should match C<number> format.")} )
     @ResponseBody
-    public ResponseEntity<List<Car>> getAllCars() {
+    public ResponseEntity<List<CarModel>> getAllCars() {
         return new ResponseEntity<>(carService.getAllCars(), HttpStatus.OK);
     }
 }
